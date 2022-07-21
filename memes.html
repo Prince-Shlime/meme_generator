@@ -1,0 +1,107 @@
+<!-- EXERCISES
+Exercise 1: Set up the basic markup and style it.
+Exercsie 2: Show the list of meme templates.
+Exercise 3: Show the selected meme image.
+Exercise 4: Show the number of input boxes for meme text.
+Bonus: Add a button to get random meme.
+Homework 1: Go to next meme when clicked on the image.
+Homework 2: Make the app responsive using media queries.
+
+-->
+
+<html>
+
+<head>
+  <title>Meme Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <meta name = "viewpoint" content = "width=device-width, initial-scale=1">
+</head>
+<script src="helper.js"></script>
+<body>
+
+  <h1>Welcome to the world of memes!</h1>
+  
+  <div class = "container">
+    <div class = "creator">
+      <select id = "meme-template"></select>   
+      <img id = "selected-image">
+      <div class = "boxes"></div>
+      <button id = "generate-btn">PRODUCE GODS WORK</button>
+    </div>
+    
+    <div class = "final-meme">
+      <img src = "meme.jpg" id = "meme-image">
+      <p id = "meme-url"> Memes Shall Appear Here </p>      
+    </div>
+  </div>
+
+  
+  
+  <script>
+    var memesArray, meme;
+    
+    function showOptions(data){
+      console.log(data);
+      memesArray = data.data.memes;
+      for(c in memesArray){
+        var optionTag = `<option value = "${c}">
+                          ${memesArray[c].name}
+                         </option>`;
+        $("#meme-template").append(optionTag);
+      }
+      $("#meme-template").change(changeMemes);
+      changeMemes();
+    }
+    getMemes(showOptions);
+
+    function changeMemes(){
+      var memeI = $("#meme-template").val();
+      meme = memesArray[memeI];
+      $("#selected-image").attr("src", meme.url);      
+      var boxC = meme.box_count;
+      var inputHTML = "<input type = 'text' placeholder = 'insert dem words'>";
+      var inputs = inputHTML.repeat(boxC);
+      $(".boxes").html(inputs);
+    }
+    
+    function nextMeme(){
+      var selected = $("#meme-template").val();
+      var next = parseInt(selected) + 1;
+      if(next >= memesArray.length){
+        next = 0;
+      }
+      $("#meme-template").val(next);
+      $("#meme-template").change();
+    }
+    $("#selected-image").click(nextMeme);
+    
+    function generate(){
+      var memeInputs = $(".boxes > input");
+      var textList = [];
+      for(input of memeInputs){
+        var textObj = {"text": $(input).val()};
+        textList.push(textObj);
+      }
+      console.log(textList);
+      createMeme(meme.id, textList, showMeme);
+    }
+    $("#generate-btn").click(generate);
+    
+    function showMeme(response){
+        console.log(response);
+        if(response.success){
+        var url = response.data.url;
+        $("#meme-image").attr("src", url);
+        $("#meme-url").text(url);
+      }else{
+        $("#meme-image").attr("src", "error.jpg");
+        $("#meme-url").text("Need to put some words down buddy");
+      }
+    }
+    
+  </script>
+</body>
+
+</html>
